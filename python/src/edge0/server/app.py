@@ -180,8 +180,12 @@ def _chat_stream(server: QueueServer, payload: dict):
                 # incomplete multi-byte sequence at the very end of the
                 # generation) so the concatenated deltas equal the
                 # non-streaming text exactly.
-                tail = _incremental_suffix(
-                    emitted, decode_tokens(server.engine, seen_ids))
+                # The generation is over, so nothing will complete a
+                # trailing U+FFFD any more: emit it as the non-streaming
+                # response does instead of holding it back forever.
+                final = decode_tokens(server.engine, seen_ids)
+                tail = (final[len(emitted):] if final.startswith(emitted)
+                        else _incremental_suffix(emitted, final))
                 if tail:
                     _emit(tail)
             events.put(sse_format({

@@ -87,7 +87,11 @@ def parse_chat_request(payload: dict) -> ChatRequest:
         temperature=payload.get("temperature"),
         top_p=payload.get("top_p"),
         top_k=payload.get("top_k"),
-        max_tokens=payload.get("max_tokens"),
+        # OpenAI deprecated ``max_tokens`` in favour of
+        # ``max_completion_tokens``, which current SDKs and clients send.
+        max_tokens=(payload["max_completion_tokens"]
+                    if payload.get("max_completion_tokens") is not None
+                    else payload.get("max_tokens")),
         seed=payload.get("seed"),
         stream=bool(payload.get("stream", False)),
         enable_thinking=payload.get("enable_thinking"),

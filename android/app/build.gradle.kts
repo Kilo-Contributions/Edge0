@@ -32,6 +32,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_SHA",
             "\"${System.getenv("E0_GIT_SHA") ?: "unknown"}\"")
+        // engine provenance for the benchmark submission block (repo-root vendor.llama.pin)
+        val enginePin = providers.fileContents(
+            rootProject.layout.projectDirectory.dir("..").file("vendor.llama.pin")
+        ).asText.map { it.trim().substringBefore(' ') }.orElse("unknown")
+        buildConfigField("String", "ENGINE_COMMIT", "\"${enginePin.get()}\"")
     }
     buildTypes {
         debug { isMinifyEnabled = false }

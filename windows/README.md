@@ -129,6 +129,27 @@ Context to keep when reading these numbers:
 - Same-condition A/B against unpatched vanilla llama.cpp (vendor tree with the patch bands skipped) shows the patch set costs nothing (8B: 41.5 vs 39.5 decode; 35B: 27.2 vs 27.4 — within machine drift).
 - Expect day-to-day drift of a few percent on this class of machine; compare like-for-like, same day, same process if you benchmark.
 
+### 2.1 Community benchmark submission (Hardware Benchmarks #142)
+
+To add a Windows row to the Hardware Benchmarks discussion (#142), build the
+engine and download a tier as in §1, then run:
+
+    python tools/r3_bench.py --tier 8b --submission --reporter @you
+
+The script discards the short warmup, runs 2 timed reps (`--reps N` to
+override) on the ~3k-token long-context prompt (same construction as the
+Python bench's BENCH_LONG), and prints a ready-to-paste submission block —
+the mean of the timed reps, with `device` / `chip` / `gpu` (the Vulkan device
+from the engine log) / `ram_gb` / `os` / `engine_commit` (vendor.llama.pin)
+filled in automatically. `--json` additionally prints the block as a single
+JSON line for aggregation, and `benchmarks/r3/bench_<tier>_submission.json`
+stores the per-rep detail.
+
+On the memory field: `peak_active_gib` on Windows is the engine process's
+peak working set during the timed reps (OS-level high-water mark). Windows
+has no allocator-level counter, so this is not directly comparable with the
+python-mlx column's `mlx.core.get_peak_memory()`.
+
 ---
 
 ## 3. Technical Details
